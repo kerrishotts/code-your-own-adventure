@@ -1,70 +1,45 @@
-import INTENTS from "./intents.js";
+import {INTENTS, TOKEN_CAT, TOKEN_KIND, tokens, addTokens} from "./parsingData.js";
 
-const TOKENS = [
-    ["go", "walk", "run", "move"],
-    "open",
-    "close",
-    "lock",
-    "unlock",
-    ["attack", "hit", "whack", "kill", "maim", "kick"],
-    ["inventory", "inv", "i"],
-    ["take", "get", "pick up", "pick"],
-    ["drop", "put back", "put", "put down"],
-    "throw",
-    ["examine", "ex", "x", "look", "look"],
-    "restart",
-    ["save", "store"],
-    ["load", "restore"],
-    ["with", "using"]
-];
-
-const TOKEN_INTENT_MAP = {
-    "go": INTENTS.GO,
-    "open": INTENTS.OPEN_THING,
-    "close": INTENTS.CLOSE_THING,
-    "lock": INTENTS.LOCK_THING,
-    "unlock": INTENTS.UNLOCK_THING,
-    "attack": INTENTS.ATTACK_THING,
-    "take": INTENTS.TAKE_THING,
-    "drop": INTENTS.DROP_THING,
-    "examine": INTENTS.EXAMINE_THING,
-    "restart": INTENTS.RESTART_GAME,
-    "save": INTENTS.SAVE_GAME,
-    "load": INTENTS.RESTORE_GAME,
-    "with": INTENTS.CONNECTOR
-}
-
-export default class Parser {
-    constructor() {
-        this._tokens = {
-            ignore: ["a", "the", "at"],
-            connections: {
-                "with":
-            },
-
-            articles: ["a", "the"],
-            prepositions: ["with"],
-            intents: []
-
-        }
-        this._verbs = {};
-    }
-
-    addVerb()
-
-    /**
-     * Parse a string, returning an intent
-     *
-     * @param {any} str
-     *
-     * @memberof Parser
-     */
+export default {
+    addTokens,
     parse(str) {
-        return {
-            intent: INTENTS.ATTACK_THING,
-            thing: "monster",
-            connector: "club"
+        let parsing = {
+            _curToken: "",
+            intent: INTENTS.NONE,
+            noun: {
+                token: "",
+                cat: TOKEN_CAT.NONE
+            },
+            connectedNoun: {
+                token: "",
+                cat: TOKEN_CAT.NONE
+            }
+        };
+        if (str === undefined || str === null) {
+            return parsing;
         }
+
+        // lower case everything to make tokenization easier;
+        // add a space at the end as well, which makes matching tokens
+        // easier.
+        let temp = str.toLowerCase().trim() + " ";
+        let allTokens = Object.keys(tokens).reduce((a, key) => a.concat(tokens[key].tokens), []);
+
+        let chars = temp.split("");
+        return chars.reduce((a, c) => {
+            if (c === " ") {
+                // we're at a word break, see if any tokens match
+                if (allTokens.indexOf(a._curToken) > -1) {
+                    // we've got a match!
+
+                } else {
+                    // add the character to the token and continue processing
+                    a._curToken += c;
+                }
+            }
+            return a;
+        }, parsing);
+
 
     }
 }
