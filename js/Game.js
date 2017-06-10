@@ -1,9 +1,10 @@
-import Entity from "./Entity.js";
-import Room from "./Room.js";
-import Thing from "./Thing.js";
-
 import Journal from "./Journal.js";
 import Prompt from "./Prompt.js";
+import Parser from "./Parser.js";
+
+import buildEntities from "./story/entities.js";
+import buildThings from "./story/things.js";
+import buildRooms from "./story/rooms.js";
 
 export default class Game {
     constructor(parentEl = undefined) {
@@ -14,43 +15,18 @@ export default class Game {
         this.prompt = new Prompt(parentEl);
 
         this.player = null;
+        this.entities = {};
         this.things = {};
         this.rooms = {};
     }
 
     initializeState() {
-        this.player = new Entity({
-            name: "Alex",
-            extra: {
-                kind: "player"
-            }
-        });
+        this.entities = buildEntities();
+        this.player = this.entities.player;
 
-        this.things = {
-            "flower": new Thing({
-                name: "flower",
-                desc: "A beautiful flower, petals extended and glimmering, and leaves stretched out."
-            }),
-            "key": new Thing({
-                name: "rusty key",
-                aliases: ["key"],
-                desc: "An incredibly rusty key; it almost falls to pieces in your hands."
-            }),
-        }
+        this.things = buildThings();
 
-        this.rooms = {
-            "garden": new Room({
-                name: "The Garden",
-                exits: () => ({
-                    north: this.rooms.aviary,
-                    south: this.rooms.promenade,
-                    west: this.rooms.river,
-                    east: this.rooms.cliff
-                }),
-                desc: "You are in a beautiful garden.",
-                things: [ this.things.flower ]
-            }),
-        }
+        this.rooms = buildRooms(this.things, this.entities);
 
         // initial player start
         this.player.location = this.rooms.garden;
@@ -64,17 +40,30 @@ export default class Game {
               player = this.player;
 
         while (!this.gameOver) {
-            let curRoom = player.location,
-                command, normalizedCommand;
+            let curRoom = player.location;
+
             journal.write(curRoom.longInfo, "\n");
 
             try {
-                command = await prompt.getInput();
-                normalizedCommand = command.toLowerCase().trim();
+                const command = await prompt.getInput();
+                const normalizedCommand = command.toLowerCase().trim();
+                const parsedCommand = Parser.parse(normalizedCommand,
+                    Object.entries(this.player.location.things)
+                        .reduce((a, [key, thing]) => (a[key] = {
+                            obj: thing,
+                            tokens: [thing.name].concat(thing.aliases),
+                            kind: Parser.TOKEN_KIND.NOUN,
+                            cat: Parser.TOKEN_CAT.THING,
+                            intent: Parser.INTENTS.NONE,
+                        }, a),
+                    {})
+                );
+
+                console.log(parsedCommand);
 
                 journal.write(`> ${normalizedCommand === "" ? "(nothing)" : command}\n`, "\n");
             } catch (err) {
-                journal.write(err);
+                journal.write(err.message, "\n");
             }
         }
     }

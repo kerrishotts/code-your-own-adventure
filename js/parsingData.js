@@ -2,6 +2,7 @@ export const TOKEN_KIND = {
     UNKNOWN: 0,
     NOUN: 1,
     VERB: 2,
+    ACTION: 2,
     CONNECTOR: 3
 }
 

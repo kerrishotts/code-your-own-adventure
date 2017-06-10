@@ -1,0 +1,23 @@
+{
+  "name": "code-your-own-adventure",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kerrishotts/code-your-own-adventure.git"
+  },
+  "author": "Kerri Shotts",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kerrishotts/code-your-own-adventure/issues"
+  },
+  "homepage": "https://github.com/kerrishotts/code-your-own-adventure#readme",
+  "dependencies": {
+    "eslint": "^3.19.0",
+    "eslint-plugin-async-await": "0.0.0"
+  }
+}
