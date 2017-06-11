@@ -6,7 +6,7 @@ export default function buildThings() {
             name: "flower",
             desc: "A beautiful flower, petals extended and glimmering, and leaves stretched out."
         }),
-        "key": new Thing({
+        "treasureKey": new Thing({
             name: "rusty key",
             aliases: ["key"],
             desc: "An incredibly rusty key; it almost falls to pieces in your hands."
