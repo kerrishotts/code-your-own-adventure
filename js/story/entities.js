@@ -1,4 +1,4 @@
-import Entity from "../Entity.js";
+import Entity from "../classes/Entity.js";
 
 export default function buildEntities() {
     return {

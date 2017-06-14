@@ -1,4 +1,4 @@
-import {dv} from "./util.js";
+import dv from "../util/dv.js";
 
 export default class Thing {
 

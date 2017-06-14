@@ -1,6 +1,6 @@
-import Journal from "./Journal.js";
-import Prompt from "./Prompt.js";
-import Parser from "./Parser.js";
+import Journal from "./components/Journal.js";
+import Prompt from "./components/Prompt.js";
+import Parser from "./parser/Parser.js";
 
 import buildEntities from "./story/entities.js";
 import buildThings from "./story/things.js";

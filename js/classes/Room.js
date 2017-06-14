@@ -1,4 +1,4 @@
-import {dv} from "./util.js";
+import dv from "../util/dv.js";
 import Thing from "./Thing.js";
 
 export default class Room extends Thing {

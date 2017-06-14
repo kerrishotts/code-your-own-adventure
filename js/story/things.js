@@ -1,4 +1,4 @@
-import Thing from "../Thing.js";
+import Thing from "../classes/Thing.js";
 
 export default function buildThings() {
     return {

@@ -1,4 +1,4 @@
-import Room from "../Room.js";
+import Room from "../classes/Room.js";
 
 function buildRooms(things, entities) {
     let rooms = {
