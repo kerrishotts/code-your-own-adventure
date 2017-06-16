@@ -56,7 +56,7 @@ let Door = (superclass) => class extends superclass {
         if (this.unlocked && this.closed) {
             this._open = true;
         } else {
-            throw new Error("Already open");
+            throw new Error("Already open, don't do that again");
         }
     }
 
