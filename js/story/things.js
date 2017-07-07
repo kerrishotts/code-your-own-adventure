@@ -1,4 +1,5 @@
 import Thing from "../classes/Thing.js";
+import Entity from "../classes/Entity.js";
 
 export default function buildThings() {
     return {
@@ -15,5 +16,15 @@ export default function buildThings() {
             name: "door",
 
         })*/
+
+        /* entities */
+        "player": new Entity({
+            name: "Alex",
+            kind: "player"
+        }),
+        "shark": new Entity({
+            name: "Sharp Tooth",
+            kind: "enemy"
+        }),
     };
 }
