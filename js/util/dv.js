@@ -5,13 +5,13 @@
  * @param {string} key
  * @param {any} dflt
  */
-export default function dv(obj, key, dflt = undefined) {
-    let v;
+
+export default function dv(obj, key, dflt = undefined, thisArg = null) {
+    let v, thatArg = thisArg || obj;
     if (obj) {
-        if (typeof obj[key] === "function") {
-            v = obj[key].call(obj, obj);
-        } else {
-            v = obj[key];
+        v = obj[key];
+        if (typeof v === "function") {
+            v = Reflect.apply(v, thatArg, [obj]);
         }
     }
     if (v === undefined || v === null) {
