@@ -2,72 +2,89 @@ import Journal from "./components/Journal.js";
 import Prompt from "./components/Prompt.js";
 import Parser from "./parser/Parser.js";
 
-import buildEntities from "./story/entities.js";
+import GameState from "./classes/GameState.js";
+
 import buildThings from "./story/things.js";
 import buildRooms from "./story/rooms.js";
 
+import {RENDER_KEYS} from "./classes/Thing.js";
+
 export default class Game {
     constructor(parentEl = undefined) {
-
         this.gameOver = false;
 
         this.journal = new Journal(parentEl);
         this.prompt = new Prompt(parentEl);
 
-        this.player = null;
-        this.entities = {};
-        this.things = {};
-        this.rooms = {};
+        this.state = new GameState();
     }
 
     initializeState() {
-        this.entities = buildEntities();
-        this.player = this.entities.player;
-
-        this.things = buildThings();
-
-        this.rooms = buildRooms(this.things, this.entities);
+        this.state = this.state.merge({
+            things: buildThings(),
+            rooms: buildRooms(),
+        });
 
         // initial player start
-        this.player.location = this.rooms.garden;
+        this.state = this.state.setEntityLocation("player", "garden");
+        //this.state.player.location = this.state.rooms.garden;
     }
 
     async play() {
         this.initializeState();
 
         const journal = this.journal,
-              prompt = this.prompt,
-              player = this.player;
+            prompt = this.prompt;
 
         while (!this.gameOver) {
-            let curRoom = player.location;
+            let state = this.state;
+            let player = state.entities.player;
+            let curRoom = state.getRoomByName(player.location);
 
-            journal.write(curRoom.longInfo, "\n");
+            journal.write(curRoom.render(RENDER_KEYS.LONG, state), "\n");
 
             try {
                 const command = await prompt.getInput();
                 const normalizedCommand = command.toLowerCase().trim();
-                const parsedCommand = Parser.parse(normalizedCommand,
-                    Object.entries(this.player.location.things)
-                        .reduce((a, [key, thing]) => (a[key] = {
-                            obj: thing,
-                            tokens: [thing.name].concat(thing.aliases),
-                            kind: Parser.TOKEN_KIND.NOUN,
-                            cat: Parser.TOKEN_CAT.THING,
-                            intent: Parser.INTENTS.NONE,
-                        }, a),
-                    {})
+                const parsedCommand = Parser.parse(
+                    normalizedCommand,
+                    Object.entries(state
+                        .getRoomByName(player.location)
+                        .things.map(thing => state.getThingByName(thing))
+                    ).reduce((a, [key, thing]) => {
+                            a[key] = {
+                                obj: thing,
+                                tokens: [thing.name].concat(thing.aliases),
+                                kind: Parser.TOKEN_KIND.NOUN,
+                                cat: Parser.TOKEN_CAT.THING,
+                                intent: Parser.INTENTS.NONE,
+                            };
+                            return a;
+                        },
+                        []
+                    )
                 );
+
+                if (parsedCommand.intent === Parser.INTENTS.GO) {
+                    let desiredLocation = curRoom.exits[parsedCommand.noun.token];
+                    if (desiredLocation) {
+                        this.state = state.setEntityLocation("player", desiredLocation);
+                    } else {
+                        throw new Error("You can't go that way, no matter how hard you try!");
+                    }
+                }
 
                 console.log(parsedCommand);
 
-                journal.write(`> ${normalizedCommand === "" ? "(nothing)" : command}\n`, "\n");
+                journal.write(
+                    `> ${normalizedCommand === "" ? "(nothing)" : command}\n`,
+                    "\n"
+                );
             } catch (err) {
                 journal.write(err.message, "\n");
             }
         }
     }
-
 }
 /*
     var player, objects, rooms;

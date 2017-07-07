@@ -1,23 +1,41 @@
 import Thing from "./Thing.js";
+import {_PROPS} from "./sharedPrivateSymbols.js";
+import guard from "../util/guard.js";
+
+/**
+ * @typedef {Object} EntityProps
+ * @extends {ThingProps}
+ *
+ * @property {number} [health = 100]     the health of the entity on a scale of 0 - 100
+ * @property {number} [stamina = 100]    the stamina on a scale 0 - 100
+ * @property {number} [strength = 1]     the entity's strength
+ * @property {number} [level = 1]        the entity's level
+ * @property {string} [location = undefined]   the location of the entity
+ * @property {string} [kind = "entity"]  the thing's kind
+ */
 
 export default class Entity extends Thing {
     /**
      * Creates an instance of Entity.
-     * @param {any} [{name = undefined, health = 100, stamina = 100,
-     *                  strength = 1, level = 1, location = undefined, holding = []}={}]
+     *
+     * @param {EntityProps} [props = {}]      properties for this entity
      *
      * @memberof Entity
      */
-    constructor({name = undefined, health = 100, stamina = 100,
-                 strength = 1, level = 1, location = undefined, holding = [], extra = {}} = {}) {
-        super({name, kind: "entity", extra});
-
-        this._health = health;
-        this._stamina = stamina;
-        this._strength = strength;
-        this._level = level;
-        this._location = location;
-        this._holding = holding;
+    constructor(props = {}) {
+        let defaultProps = {
+            name: undefined,
+            droppable: false,
+            fixed: true,
+            health: 100,
+            stamina: 100,
+            strength: 1,
+            level: 1,
+            location: undefined,
+            things: [],
+            kind: "entity",
+        };
+        super(Object.assign({}, defaultProps, props));
     }
 
     /* health management */
@@ -31,7 +49,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get health() {
-        return this._health;
+        return this[_PROPS].health;
     }
 
     /**
@@ -42,7 +60,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get dead() {
-        return this._health <= 0;
+        return this.health <= 0;
     }
 
     /**
@@ -54,7 +72,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get alive() {
-        return this._health > 0;
+        return this.health > 0;
     }
 
     /**
@@ -65,7 +83,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get hurt() {
-        return this._health < 100;
+        return this.health < 100;
     }
 
     /**
@@ -74,9 +92,10 @@ export default class Entity extends Thing {
      * @param {number} howMuch
      *
      * @memberof Entity
+     * @return Entity
      */
     injure(howMuch) {
-        this._health -= howMuch;
+        return this.merge({health: this.health - howMuch});
     }
 
     /**
@@ -85,9 +104,10 @@ export default class Entity extends Thing {
      * @param {number} howMuch
      *
      * @memberof Entity
+     * @return Entity
      */
     heal(howMuch) {
-        this._health += howMuch;
+        return this.merge({health: this.health + howMuch});
     }
 
     /* stamina management */
@@ -101,7 +121,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get stamina() {
-        return this._stamina;
+        return this[_PROPS].stamina;
     }
 
     /**
@@ -112,7 +132,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get winded() {
-        return this._stamina < 100;
+        return this.stamina < 100;
     }
 
     /**
@@ -123,7 +143,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     rest(howMuch = 100) {
-        this._stamina = Math.min(100, this._stamina + howMuch);
+        return this.merge({stamina: this.stamina + Math.min(100, this.stamina + howMuch)});
     }
 
     /* strength */
@@ -136,7 +156,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get strength() {
-        return this._strength;
+        return this[_PROPS]._strength;
     }
 
     /**
@@ -145,9 +165,10 @@ export default class Entity extends Thing {
      * @param {number} howMuch
      *
      * @memberof Entity
+     * @return Entity
      */
     strengthen(howMuch) {
-        this._strength += howMuch;
+        return this.merge({strength: this.strength + howMuch});
     }
 
     /**
@@ -156,9 +177,10 @@ export default class Entity extends Thing {
      * @param {number} howMuch
      *
      * @memberof Entity
+     * @return Entity
      */
     weaken(howMuch) {
-        this._strength -= howMuch;
+        return this.merge({strength: this.strength - howMuch});
     }
 
     /* level */
@@ -171,7 +193,7 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get level() {
-        return this._level;
+        return this[_PROPS]._level;
     }
 
     /**
@@ -179,9 +201,10 @@ export default class Entity extends Thing {
      *
      *
      * @memberof Entity
+     * @return Entity
      */
     levelUp() {
-        this._level++;
+        return this.merge({strength: this.level + 1});
     }
 
     /* location */
@@ -191,103 +214,11 @@ export default class Entity extends Thing {
      * @memberof Entity
      */
     get location() {
-        return this._location;
+        return this[_PROPS].location;
     }
 
-    /**
-     * @param {Room} l
-     * @type Room
-     * @memberof Entity
-     */
-    set location(l) {
-        if (l.canHost(this)) {
-            if (this._location) {
-                if (this._location.canLeave(this)) {
-                    this._location.removeEntity(this);
-                    l.host(this);
-                    this._location = l;
-                } else {
-                    throw new Error("Entity cannot leave");
-                }
-            } else {
-                l.host(this);
-                this._location = l;
-            }
-        } else {
-            throw new Error("Entity cannot enter");
-        }
-    }
-
-    /* inventory */
-
-    /**
-     * Get the entity's inventory
-     *
-     * @readonly
-     * @type {Array<Thing>}
-     * @memberof Entity
-     */
-    get inventory() {
-        return this._holding;
-    }
-
-    /**
-     *
-     * @param {Thing} thing
-     * @returns {boolean}
-     *
-     * @memberof Entity
-     */
-
-    isHolding(thing) {
-        return this._holding.indexOf(thing) > -1;
-    }
-
-    /**
-     * Picks up thing, if possible
-     *
-     * @param {Thing} thing
-     *
-     * @memberof Entity
-     */
-
-    pickUp(thing) {
-        if (!this.location) {
-            throw new Error("Nowhere; can't pick up");
-        }
-        if (this.isHolding(thing)) {
-            throw new Error("Already holding that");
-        }
-        if (!this.location.canRelease(thing)) {
-            throw new Error("Room won't release it");
-        }
-        if (thing.canBePickedUp) {
-            this._holding.push(thing);
-            this.location.removeThing(thing);
-        }
-    }
-
-    /**
-     * Drops thing, if possible
-     *
-     * @param {Thing} thing
-     *
-     * @memberof Entity
-     */
-    drop(thing) {
-        if (!this.location) {
-            throw new Error("Nowhere; can't drop");
-        }
-        if (!this.isHolding(thing)) {
-            throw new Error("Can't drop something not held");
-        }
-        if (!this.location.canContain(thing)) {
-            throw new Error("Room won't accept thing");
-        }
-        if (thing.canBeDropped) {
-            this._holding = this._holding.filter(aThing => aThing !== thing);
-            this.location.addThing(thing);
-        }
+    setLocation(aRoom, {force = false} = {}) {
+        return this.merge({location: aRoom});
     }
 
 }
