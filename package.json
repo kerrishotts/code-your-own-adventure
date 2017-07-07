@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "http-server -c-1 -p 8080 .",
+    "test": "nyc mocha",
+    "test:watch": "watch -p 'js/**/*.js' -c 'npm test'"
   },
   "repository": {
     "type": "git",
@@ -19,5 +21,35 @@
   "dependencies": {
     "eslint": "^3.19.0",
     "eslint-plugin-async-await": "0.0.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.0.1",
+    "@types/mocha": "^2.2.41",
+    "chai": "^4.0.2",
+    "http-server": "^0.10.0",
+    "mocha": "^3.4.2",
+    "nyc": "^11.0.3",
+    "source-map-support": "^0.4.15",
+    "ts-node": "^3.1.0",
+    "typescript": "^2.4.1",
+    "watch-cli": "^0.2.1"
+  },
+  "nyc": {
+    "include": [
+      "js/**/*.js"
+    ],
+    "extension": [
+      ".js"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "sourceMap": true,
+    "instrument": true
   }
 }
