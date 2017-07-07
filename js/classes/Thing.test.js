@@ -8,8 +8,6 @@ import {ThingCannotAddThingError, ThingRefusedAddingThingError,
         ThingCannotRemoveThingError, ThingRefusedRemovingThingError} from "./Thing.js";
 import {ImmutableUnableToHandleUnknownActionError} from "./Immutable.js";
 
-import {RENDER_KEYS} from "./Thing.js";
-
 import {expect} from "chai";
 
 describe("Thing Tests", function() {
@@ -19,8 +17,6 @@ describe("Thing Tests", function() {
             expect(thing).to.exist;
             expect(thing).to.have.property("fixed", false);
             expect(thing).to.have.property("visible", true);
-            expect(thing).to.have.property("canBeDropped", true);
-            expect(thing).to.have.property("canBePickedUp", true);
             expect(thing).to.have.property("kind", "thing");
             expect(thing).to.have.property("aliases").with.lengthOf(0);
             expect(thing).to.have.property("things").with.lengthOf(0);
@@ -151,26 +147,4 @@ describe("Thing Tests", function() {
             }
         });
     });
-    describe("#rendering", function() {
-        let gameState = new GameState({
-            things: buildThings(),
-            rooms: []
-        });
-        it("should be able to render things, excluding player", function () {
-            const thing = new Thing({name: "room", things: ["player", "flower"]}),
-                  filteredThings = thing.render(RENDER_KEYS.THINGS_WITHOUT_PLAYER, gameState);
-            expect(filteredThings).to.deep.equal(["flower"]);
-        });
-        it("should be able to render the short info", function () {
-            const thing = new Thing({name: "room", things: ["player", "flower"]}),
-                  shortInfo = thing.render(RENDER_KEYS.SHORT, gameState);
-            expect(shortInfo).to.equal(thing.name);
-        });
-        it("should be able to render the long info", function () {
-            const thing = new Thing({name: "room", desc: "bare", things: ["player", "flower"]}),
-                  longInfo = thing.render(RENDER_KEYS.LONG, gameState);
-            expect(longInfo).to.deep.equal([thing.name, "\n", thing.desc, "\n"]);
-        });
-
-    })
 });

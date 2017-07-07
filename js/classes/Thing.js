@@ -19,12 +19,6 @@ export const {
     "ThingUnableToHandleUnknownActionError": "FT1999"
 });
 
-export const RENDER_KEYS = {
-    SHORT: "short",
-    LONG: "long",
-    THINGS_WITHOUT_PLAYER: "things:no-player"
-};
-
 /**
  * @typedef {Object} ThingProps
  *
@@ -38,7 +32,7 @@ export const RENDER_KEYS = {
  * @property {boolean}  [visible = true]        determines visibility to the player and other entities
  */
 
-export default class Thing extends Immutable{
+export default class Thing extends Immutable {
     /**
      * Creates an instance of Thing.
      *
@@ -78,7 +72,7 @@ export default class Thing extends Immutable{
      * @memberof Thing
      */
     get name() {
-        return dv(this[_PROPS], "name", undefined, this);
+        return this[_PROPS].name;
     }
 
     /**
@@ -113,7 +107,11 @@ export default class Thing extends Immutable{
      * @memberof Thing
      */
     get desc() {
-        return dv(this[_PROPS], "desc", undefined, this);
+        return this[_PROPS].desc;
+    }
+
+    getDescription(state = null) {
+        return (typeof this.desc === "function") ? this.desc(this, state) : this.desc;
     }
 
     /* fixed */
@@ -125,39 +123,19 @@ export default class Thing extends Immutable{
      * @memberof Thing
      */
     get fixed() {
-        return dv(this[_PROPS], "fixed", undefined, this);
+        return this[_PROPS].fixed;
+    }
+
+    getFixed(state = null) {
+        return (typeof this.fixed === "function") ? this.fixed(this, state) : this.fixed;
     }
 
     setFixed(f) {
         return this.merge({fixed: f});
     }
 
-    /**
-     * If true, item can be picked up
-     *
-     * @type boolean
-     *
-     * @readonly
-     *
-     * @memberof Thing
-     */
-    get canBePickedUp() {
-        return !this.fixed;
-    }
-
-    /**
-     * If true, item can be dropped
-     *
-     * @type boolean
-     *
-     * @readonly
-     *
-     * @memberof Thing
-     * @return Thing
-     */
-
-    get canBeDropped() {
-        return dv(this[_PROPS], "droppable", undefined, this);
+    canBePickedUp(state = null) {
+        return !this.getFixed(state);
     }
 
     /* visibility */
@@ -169,7 +147,11 @@ export default class Thing extends Immutable{
      * @memberof Thing
      */
     get visible() {
-        return dv(this[_PROPS], "visible", undefined, this);
+        return this[_PROPS].visible;
+    }
+
+    getVisibility(state = null) {
+        return (typeof this.visible === "function") ? this.visible(this, state) : this.visible;
     }
 
     /**
@@ -213,29 +195,14 @@ export default class Thing extends Immutable{
         return [this.name, "\n", this.desc, "\n"];
     }
 
-    /**
-     *
-     * @param {string} [key="short"]
-     * @param {GameState} [state={}]
-     * @returns {any}
-     * @memberof Thing
-     */
-    render(key = "short", state = null) {
-        switch(key) {
-            default:
-            case "short":
-                return this.shortInfo;
-            case "long":
-                return this.longInfo;
-            case "things:no-player":
-                return this.things.filter(thing => state.getThingByName(thing).kind !== "player");
-        }
-    }
-
     /* things management */
 
     get things() {
         return this[_PROPS].things;
+    }
+
+    getThingsExcludingPlayer(state = null) {
+        return this.things.filter(thing => state.getThingByName(thing).kind !== "player");
     }
 
     /**

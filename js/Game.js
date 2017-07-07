@@ -7,8 +7,6 @@ import GameState from "./classes/GameState.js";
 import buildThings from "./story/things.js";
 import buildRooms from "./story/rooms.js";
 
-import {RENDER_KEYS} from "./classes/Thing.js";
-
 export default class Game {
     constructor(parentEl = undefined) {
         this.gameOver = false;
@@ -41,7 +39,7 @@ export default class Game {
             let player = state.entities.player;
             let curRoom = state.getRoomByName(player.location);
 
-            journal.write(curRoom.render(RENDER_KEYS.LONG, state), "\n");
+            journal.write(curRoom.getDescription(state), "\n");
 
             try {
                 const command = await prompt.getInput();
@@ -50,7 +48,7 @@ export default class Game {
                     normalizedCommand,
                     Object.entries(state
                         .getRoomByName(player.location)
-                        .things.map(thing => state.getThingByName(thing))
+                        .getThingsExcludingPlayer(state).map(thing => state.getThingByName(thing))
                     ).reduce((a, [key, thing]) => {
                             a[key] = {
                                 obj: thing,
@@ -66,7 +64,7 @@ export default class Game {
                 );
 
                 if (parsedCommand.intent === Parser.INTENTS.GO) {
-                    let desiredLocation = curRoom.exits[parsedCommand.noun.token];
+                    let desiredLocation = curRoom.getRoomExits(state)[parsedCommand.noun.token];
                     if (desiredLocation) {
                         this.state = state.setEntityLocation("player", desiredLocation);
                     } else {

@@ -2,8 +2,6 @@ import dv from "../util/dv.js";
 import Thing from "./Thing.js";
 import {_PROPS} from "./sharedPrivateSymbols.js";
 
-import {RENDER_KEYS} from "./Thing.js";
-
 export default class Room extends Thing {
     constructor(props = {}) {
         let defaultProps = {
@@ -19,18 +17,16 @@ export default class Room extends Thing {
     /* exits */
 
     get exits() {
-        return dv(this[_PROPS], "exits", undefined, this);
+        return this[_PROPS].exits;
     }
 
-    /**
-     * @type Array<string>
-     *
-     * @readonly
-     *
-     * @memberof Room
-     */
-    get exitDirections() {
-        return Object.keys(this.exits).filter(exit => this.exits[exit]);
+    getRoomExits(state = null) {
+        return (typeof this.exits === "function") ? this.exits(this, state) : this.exits;
+    }
+
+    getRoomExitDirections(state = null) {
+        const exits = this.getRoomExits(state);
+        return Object.keys(exits).filter(dir => exits[dir]);
     }
 
     canEntityEnter(entity) {
@@ -41,27 +37,22 @@ export default class Room extends Thing {
         return this.canRemoveThing(entity);
     }
 
-    render(key = "short", state = null) {
-        let r = super.render(key, state);
-        switch(key) {
-            case RENDER_KEYS.LONG: {
-                let exitDirections = this.exitDirections,
-                    things = this.render(RENDER_KEYS.THINGS_WITHOUT_PLAYER, state);
-                return [
-                    this.name,
-                    "\n",
-                    this.desc,
-                    "\n",
-                    things.length > 0 ? "You can see " : "",
-                    things.length === 1 ? "a " : "",
-                    things.map(thing => state.getThingByName(thing).shortInfo).join(", "),
-                    "\n",
-                    exitDirections.length > 0 ? "Exits: " : "",
-                    exitDirections.join(", "),
-                    "\n",
-                ];
-            }
-        }
-        return r;
+    getDescription(state = null) {
+        const superDesc = super.getDescription(state);
+        const exitDirections = this.getRoomExitDirections(state),
+              things = this.getThingsExcludingPlayer(state);
+        return [
+            this.name,
+            "\n",
+            superDesc,
+            "\n",
+            things.length > 0 ? "You can see " : "",
+            things.length === 1 ? "a " : "",
+            things.map(thing => state.getThingByName(thing).shortInfo).join(", "),
+            "\n",
+            exitDirections.length > 0 ? "Exits: " : "",
+            exitDirections.join(", "),
+            "\n",
+        ];
     }
 }

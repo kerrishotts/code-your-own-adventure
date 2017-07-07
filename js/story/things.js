@@ -1,5 +1,6 @@
 import Thing from "../classes/Thing.js";
 import Entity from "../classes/Entity.js";
+import Door from "../classes/Door.js";
 
 export default function buildThings() {
     return {
@@ -11,12 +12,13 @@ export default function buildThings() {
             name: "rusty key",
             aliases: ["key"],
             desc: "An incredibly rusty key; it almost falls to pieces in your hands."
-        }),/*
-        "doorToTreasure": new Door({
-            name: "door",
-
-        })*/
-
+        }),
+        "treasureDoor": new Door({
+            name: "treasure door",
+            aliases: ["door", "big door"],
+            unlocksWith: "treasureKey",
+            desc: "A very large, heavy, wooden door. I don't think it will budge."
+        }),
         /* entities */
         "player": new Entity({
             name: "Alex",
