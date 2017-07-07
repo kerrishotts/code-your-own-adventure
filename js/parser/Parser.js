@@ -1,29 +1,62 @@
 import {INTENTS, TOKEN_CAT, TOKEN_KIND, tokens, addTokens} from "./parsingData.js";
 
-function Noun({token = "", cat = TOKEN_CAT.THING} = "") {
-    this.token = token
-    this.cat = cat;
+/**
+ * A noun clouse (used in commands)
+ *
+ * @class Noun
+ */
+export class Noun {
+    /**
+     * Creates an instance of Noun.
+     * @param {any} options
+     * param {any} [{token = "", cat = TOKEN_CAT.THING}={}]
+     * @memberof Noun
+     */
+    constructor({token = "", cat = TOKEN_CAT.THING} = {}) {
+        this.token = token
+        this.cat = cat;
+    }
 }
 
-function Command() {
-    this.intent = INTENTS.NONE;
-    this.noun = null;
-    this.connectedNoun = null;
-    this._whichNoun = "noun";
+export class Command {
+    /**
+     * Creates an instance of Command.
+     * @memberof Command
+     */
+    constructor() {
+        this.intent = INTENTS.NONE;
+
+        /** @type {Noun} */
+        this.noun = null;
+
+        /** @type {Noun} */
+        this.connectedNoun = null;
+
+        this._whichNoun = "noun";
+    }
 }
 
-function Parsing({match, token, at, to} = {}) {
-    this.at = at;
-    this.to = to;
-    this.match = match;
-    this.token = token;
+
+class Parsing {
+    /**
+     * Creates an instance of Parsing.
+     * @param {any} options
+     * param {any} [{match:string = undefined, token:Token = null, at:number = undefined, to:number = undefined}={}]
+     * @memberof Parsing
+     */
+    constructor({match = undefined, token = null, at = undefined, to = undefined} = {}) {
+        this.at = at;
+        this.to = to;
+        this.match = match;
+        this.token = token;
+    }
 }
 
 /**
  * Checks if any token match collides with `this` (a single matched
  * token)
  *
- * @param {Object} tokenMatch
+ * @param {Parsing} tokenMatch
  * @returns {Boolean}
  */
 function tokenInParsings(tokenMatch) {
@@ -34,13 +67,13 @@ function tokenInParsings(tokenMatch) {
  * Intended for reducing an array of characters, getParsings will generate an array
  * of all the matched parsings in the array of characters.
  *
- * @param {Array[String]} tokenList     Array of all tokens to look for
- * @param {Array[]} tokens              Token details, including intents and the like
- * @param {Array[Parsing]} parsings     Accumulator for parsings
- * @param {String} c                    current character
- * @param {Number} idx                  current character index
- * @param {Array[]} arr                 entire array of characters
- * @returns  {Array[Parsing]}           array of parsings and positions
+ * @param {string[]} tokenList          Array of all tokens to look for
+ * @param {any[]} tokens                Token details, including intents and the like
+ * @param {Parsing[]} parsings          Accumulator for parsings
+ * @param {string} c                    current character
+ * @param {number} idx                  current character index
+ * @param {string[]} arr                entire array of characters
+ * @returns {Parsing[]}                 array of parsings and positions
  */
 function getParsings(tokenList, tokens, parsings, c, idx, arr) {
     let str = arr.join("").substr(idx), // recombine the array, but only at current pos
@@ -110,11 +143,11 @@ export default {
     /**
      * Parse a string, returning a simple command (intent + nouns)
      *
-     * @param {String} str
-     * @param {Array[]} extraTokens     extra tokens applicable to the current context
+     * @param {String} [str = undefined]
+     * @param {any} extraTokens     extra tokens applicable to the current context
      * @returns {Command}
      */
-    parse(str, extraTokens = {}) {
+    parse(str = undefined, extraTokens = {}) {
         let command = new Command(),
             combinedTokens = Object.assign({}, tokens, extraTokens);
 

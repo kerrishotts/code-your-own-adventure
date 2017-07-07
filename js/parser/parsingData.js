@@ -1,3 +1,8 @@
+/**
+ * Token kind, as in noun, verb, action, etc.
+ * @readonly
+ * @enum {number}
+ */
 export const TOKEN_KIND = {
     UNKNOWN: 0,
     NOUN: 1,
@@ -6,6 +11,12 @@ export const TOKEN_KIND = {
     CONNECTOR: 3
 }
 
+/**
+ * Token category (navigation, thing, etc.)
+ *
+ * @readonly
+ * @enum {number}
+ */
 export const TOKEN_CAT  = {
     NONE: 0,
     NAVIGATION: 1,
@@ -15,6 +26,12 @@ export const TOKEN_CAT  = {
     ACTION: 5
 }
 
+/**
+ * Normalized intents (actions with multiple aliases can only map to a single intent)
+ *
+ * @readonly
+ * @enum {string}
+ */
 export const INTENTS = {
     NONE: undefined,
     CONNECTOR: "with",
@@ -33,6 +50,15 @@ export const INTENTS = {
     SAVE_GAME: "save-game",
     RESTORE_GAME: "restore-game",
 }
+
+/**
+ * @typedef {Object} Token
+ * @property {string[]} tokens          tokens that match this token
+ * @property {TOKEN_KIND} kind          the kind of token
+ * @property {TOKEN_CATEGORY} [cat]     the token's category
+ * @property {INTENTS} [implicitIntent] the implicit intent (typical for navigation)
+ * @property {INTENTS} [intent]         the actual intent
+ */
 
 export let tokens = {
 
